@@ -21,6 +21,47 @@ public class Line {
         }
     }
 
+    public int insert(int column, String text, Cell attributes) {
+        checkBounds(column);
+        int charsWritten = 0;
+
+        // We either insert the whole text or as much as fits in the line
+        int insertLength = Math.min(text.length(), width - column);
+
+        if (insertLength <= 0) {
+            return 0;
+        }
+
+        // Move existing cells to the right to make space for the new text
+        for (int i = width - 1; i >= column + insertLength; i--) {
+            cells.set(i, cells.get(i - insertLength));
+        }
+
+        // Write the new text
+        for (int i = 0; i < insertLength; i++) {
+            Cell cell = attributes.copy();
+            cell.setCharacter(text.charAt(i));
+            cells.set(column + i, cell);
+            charsWritten++;
+        }
+
+        return charsWritten;
+    }
+
+    public int overwrite(int column, String text, Cell attributes){
+        checkBounds(column);
+        int charsWritten = 0;
+
+        for(int i = 0; i < text.length() && column + i < width; i++) {
+            Cell cell = attributes.copy();
+            cell.setCharacter(text.charAt(i));
+            cells.set(column + i, cell);
+            charsWritten++;
+        }
+
+        return charsWritten;
+    }
+
     public Cell getCell(int column){
         checkBounds(column);
         return cells.get(column);
