@@ -15,12 +15,11 @@ public class LineTest {
 
         for (int i = 0; i < line.getWidth(); i++) {
             Cell cell = line.getCell(i);
-            CellAttributes attributes = cell.getAttributes();
 
             assertEquals(' ', cell.getCharacter());
-            assertEquals(Color.DEFAULT, attributes.getForeground());
-            assertEquals(Color.DEFAULT, attributes.getBackground());
-            assertTrue(attributes.getStyles().isEmpty());
+            assertEquals(Color.DEFAULT, cell.getForeground());
+            assertEquals(Color.DEFAULT, cell.getBackground());
+            assertTrue(cell.getStyles().isEmpty());
         }
     }
 
@@ -32,34 +31,34 @@ public class LineTest {
     @Test
     void testGetCell() {
         Line line = new Line(10);
-        Cell cell = new Cell('X', Color.RED, Color.BLUE, EnumSet.of(Style.BOLD));
+        CellAttributes attributes = new CellAttributes(Color.RED, Color.BLUE, EnumSet.of(Style.BOLD));
+        Cell cell = new Cell('X', attributes);
         line.setCell(5, cell);
 
         Cell retrievedCell = line.getCell(5);
-        CellAttributes attributes = retrievedCell.getAttributes();
 
         assertEquals('X', retrievedCell.getCharacter());
-        assertEquals(Color.RED, attributes.getForeground());
-        assertEquals(Color.BLUE, attributes.getBackground());
-        assertTrue(attributes.hasStyle(Style.BOLD));
+        assertEquals(Color.RED, retrievedCell.getForeground());
+        assertEquals(Color.BLUE, retrievedCell.getBackground());
+        assertTrue(retrievedCell.hasStyle(Style.BOLD));
     }
 
     @Test
     void testClear() {
         Line line = new Line(10);
-        Cell cell = new Cell('X', Color.RED, Color.BLUE, EnumSet.of(Style.BOLD));
+        CellAttributes attributes = new CellAttributes(Color.RED, Color.BLUE, EnumSet.of(Style.BOLD));
+        Cell cell = new Cell('X', attributes);
         line.setCell(5, cell);
 
         line.clear();
 
         for (int i = 0; i < line.getWidth(); i++) {
             Cell clearedCell = line.getCell(i);
-            CellAttributes attributes = clearedCell.getAttributes();
 
             assertEquals(' ', clearedCell.getCharacter());
-            assertEquals(Color.DEFAULT, attributes.getForeground());
-            assertEquals(Color.DEFAULT, attributes.getBackground());
-            assertTrue(attributes.getStyles().isEmpty());
+            assertEquals(Color.DEFAULT, clearedCell.getForeground());
+            assertEquals(Color.DEFAULT, clearedCell.getBackground());
+            assertTrue(clearedCell.getStyles().isEmpty());
         }
     }
 
@@ -67,17 +66,18 @@ public class LineTest {
     @Test
     void testToString() {
         Line line = new Line(12);
-        line.setCell(0, new Cell('H', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
-        line.setCell(1, new Cell('E', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
-        line.setCell(2, new Cell('L', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
-        line.setCell(3, new Cell('L', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
-        line.setCell(4, new Cell('O', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
+        CellAttributes attributes = new CellAttributes(Color.RED, Color.BLUE, EnumSet.of(Style.BOLD));
+        line.setCell(0, new Cell('H', attributes));
+        line.setCell(1, new Cell('E', attributes));
+        line.setCell(2, new Cell('L', attributes));
+        line.setCell(3, new Cell('L', attributes));
+        line.setCell(4, new Cell('O', attributes));
 
-        line.setCell(6, new Cell('W', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
-        line.setCell(7, new Cell('O', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
-        line.setCell(8, new Cell('R', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
-        line.setCell(9, new Cell('L', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
-        line.setCell(10, new Cell('D', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
+        line.setCell(6, new Cell('W', attributes));
+        line.setCell(7, new Cell('O', attributes));
+        line.setCell(8, new Cell('R', attributes));
+        line.setCell(9, new Cell('L', attributes));
+        line.setCell(10, new Cell('D', attributes));
 
         assertEquals("HELLO WORLD ", line.toString());
     }
@@ -100,7 +100,7 @@ public class LineTest {
     @Test
     void testOverwrite() {
         Line line = new Line(10);
-        Cell attributes = new Cell(' ', Color.GREEN, Color.BLACK, EnumSet.of(Style.BOLD));
+        CellAttributes attributes = new CellAttributes(Color.GREEN, Color.BLACK, EnumSet.of(Style.BOLD));
         int charsWritten = line.overwrite(2, "Hello", attributes);
 
         assertEquals(5, charsWritten);
@@ -112,8 +112,8 @@ public class LineTest {
     @Test
     void testInsert(){
         Line line = new Line(10);
-        line.overwrite(0, "ABCDE", new Cell(' ', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
-        Cell attributes = new Cell(' ', Color.GREEN, Color.BLACK, EnumSet.of(Style.BOLD));
+        CellAttributes attributes = new CellAttributes(Color.GREEN, Color.BLACK, EnumSet.of(Style.BOLD));
+        line.overwrite(0, "ABCDE", attributes);
         int charsWritten = line.insert(2, "Hello", attributes);
 
         assertEquals(5, charsWritten);
@@ -125,7 +125,7 @@ public class LineTest {
     @Test
     void testInsertOverflow(){
         Line line = new Line(10);
-        Cell attributes = new Cell(' ', Color.GREEN, Color.BLACK, EnumSet.of(Style.BOLD));
+        CellAttributes attributes = new CellAttributes(Color.GREEN, Color.BLACK, EnumSet.of(Style.BOLD));
         line.overwrite(0, "ABCDEFGHIJ", attributes);
 
         int inserted = line.insert(8, "XYZ", attributes);
