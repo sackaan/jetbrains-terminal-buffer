@@ -9,46 +9,50 @@ public class CellTest {
     @Test
     void testCellConstructor() {
         Cell cell = new Cell();
+        CellAttributes attributes = cell.getAttributes();
 
         assertEquals(' ', cell.getCharacter());
-        assertEquals(Color.DEFAULT, cell.getForeground());
-        assertEquals(Color.DEFAULT, cell.getBackground());
-        assertTrue(cell.getStyles().isEmpty());
+        assertEquals(Color.DEFAULT, attributes.getForeground());
+        assertEquals(Color.DEFAULT, attributes.getBackground());
+        assertTrue(attributes.getStyles().isEmpty());
     }
 
     @Test
     void testCellConstructorParameters() {
         EnumSet<Style> styles = EnumSet.of(Style.BOLD, Style.ITALIC);
         Cell cell = new Cell('A', Color.RED, Color.BLUE, styles);
+        CellAttributes attributes = cell.getAttributes();
 
         assertEquals('A', cell.getCharacter());
-
-        assertEquals(Color.RED, cell.getForeground());
-        assertEquals(Color.BLUE, cell.getBackground());
-
-        assertTrue(cell.getStyles().contains(Style.BOLD));
-        assertTrue(cell.getStyles().contains(Style.ITALIC));
+        assertEquals(Color.RED, attributes.getForeground());
+        assertEquals(Color.BLUE, attributes.getBackground());
+        assertTrue(attributes.getStyles().contains(Style.BOLD));
+        assertTrue(attributes.getStyles().contains(Style.ITALIC));
     }
 
     @Test
     void testAddStyles() {
         Cell cell = new Cell();
-        cell.addStyle(Style.BOLD);
-        cell.addStyle(Style.ITALIC);
+        CellAttributes attributes = cell.getAttributes();
 
-        assertTrue(cell.hasStyle(Style.BOLD));
-        assertTrue(cell.hasStyle(Style.ITALIC));
+        attributes.addStyle(Style.BOLD);
+        attributes.addStyle(Style.ITALIC);
+
+        assertTrue(attributes.hasStyle(Style.BOLD));
+        assertTrue(attributes.hasStyle(Style.ITALIC));
     }
 
     @Test
     void testRemoveStyles() {
         Cell cell = new Cell();
-        cell.addStyle(Style.BOLD);
-        cell.addStyle(Style.ITALIC);
-        cell.removeStyle(Style.BOLD);
+        CellAttributes attributes = cell.getAttributes();
 
-        assertFalse(cell.hasStyle(Style.BOLD));
-        assertTrue(cell.hasStyle(Style.ITALIC));
+        attributes.addStyle(Style.BOLD);
+        attributes.addStyle(Style.ITALIC);
+        attributes.removeStyle(Style.BOLD);
+
+        assertFalse(attributes.hasStyle(Style.BOLD));
+        assertTrue(attributes.hasStyle(Style.ITALIC));
     }
 
     @Test
@@ -61,22 +65,25 @@ public class CellTest {
     @Test
     void testSetColors() {
         Cell cell = new Cell();
-        cell.setForeground(Color.GREEN);
-        cell.setBackground(Color.YELLOW);
+        CellAttributes attributes = cell.getAttributes();
 
-        assertEquals(Color.GREEN, cell.getForeground());
-        assertEquals(Color.YELLOW, cell.getBackground());
+        attributes.setForeground(Color.GREEN);
+        attributes.setBackground(Color.YELLOW);
+
+        assertEquals(Color.GREEN, attributes.getForeground());
+        assertEquals(Color.YELLOW, attributes.getBackground());
     }
 
     @Test
     void testClear() {
         Cell cell = new Cell('A', Color.RED, Color.BLUE, EnumSet.of(Style.BOLD));
         cell.clear();
+        CellAttributes attributes = cell.getAttributes();
 
         assertEquals(' ', cell.getCharacter());
-        assertEquals(Color.DEFAULT, cell.getForeground());
-        assertEquals(Color.DEFAULT, cell.getBackground());
-        assertTrue(cell.getStyles().isEmpty());
+        assertEquals(Color.DEFAULT, attributes.getForeground());
+        assertEquals(Color.DEFAULT, attributes.getBackground());
+        assertTrue(attributes.getStyles().isEmpty());
     }
 
     @Test
@@ -84,30 +91,33 @@ public class CellTest {
         Cell original = new Cell('A', Color.RED, Color.BLUE, EnumSet.of(Style.BOLD));
         Cell copy = original.copy();
 
+        CellAttributes originalAttributes = original.getAttributes();
+        CellAttributes copyAttributes = copy.getAttributes();
+
         assertEquals(original.getCharacter(), copy.getCharacter());
-        assertEquals(original.getForeground(), copy.getForeground());
-        assertEquals(original.getBackground(), copy.getBackground());
-        assertEquals(original.getStyles(), copy.getStyles());
+        assertEquals(originalAttributes.getForeground(), copyAttributes.getForeground());
+        assertEquals(originalAttributes.getBackground(), copyAttributes.getBackground());
+        assertEquals(originalAttributes.getStyles(), copyAttributes.getStyles());
 
         // Modify the copy
         copy.setCharacter('B');
-        copy.setForeground(Color.GREEN);
-        copy.setBackground(Color.YELLOW);
-        copy.addStyle(Style.ITALIC);
+        copyAttributes.setForeground(Color.GREEN);
+        copyAttributes.setBackground(Color.YELLOW);
+        copyAttributes.addStyle(Style.ITALIC);
 
         // Test original remains unchanged while copy has new value
         assertEquals('A', original.getCharacter());
         assertEquals('B', copy.getCharacter());
 
-        assertEquals(Color.RED, original.getForeground());
-        assertEquals(Color.BLUE, original.getBackground());
-        assertEquals(Color.GREEN, copy.getForeground());
-        assertEquals(Color.YELLOW, copy.getBackground());
+        assertEquals(Color.RED, originalAttributes.getForeground());
+        assertEquals(Color.BLUE, originalAttributes.getBackground());
+        assertEquals(Color.GREEN, copyAttributes.getForeground());
+        assertEquals(Color.YELLOW, copyAttributes.getBackground());
 
-        assertTrue(original.hasStyle(Style.BOLD));
-        assertFalse(original.hasStyle(Style.ITALIC));
-        assertTrue(copy.hasStyle(Style.BOLD));
-        assertTrue(copy.hasStyle(Style.ITALIC));
+        assertTrue(originalAttributes.hasStyle(Style.BOLD));
+        assertFalse(originalAttributes.hasStyle(Style.ITALIC));
+        assertTrue(copyAttributes.hasStyle(Style.BOLD));
+        assertTrue(copyAttributes.hasStyle(Style.ITALIC));
     }
 
 }
