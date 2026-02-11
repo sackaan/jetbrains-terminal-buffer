@@ -21,7 +21,7 @@ public class Line {
         }
     }
 
-    public int insert(int column, String text, Cell attributes) {
+    public int insert(int column, String text, CellAttributes attributes) {
         checkBounds(column);
         int charsWritten = 0;
 
@@ -39,8 +39,7 @@ public class Line {
 
         // Write the new text
         for (int i = 0; i < insertLength; i++) {
-            Cell cell = attributes.copy();
-            cell.setCharacter(text.charAt(i));
+            Cell cell = new Cell(text.charAt(i), attributes);
             cells.set(column + i, cell);
             charsWritten++;
         }
@@ -48,13 +47,12 @@ public class Line {
         return charsWritten;
     }
 
-    public int overwrite(int column, String text, Cell attributes){
+    public int overwrite(int column, String text, CellAttributes attributes) {
         checkBounds(column);
         int charsWritten = 0;
 
         for(int i = 0; i < text.length() && column + i < width; i++) {
-            Cell cell = attributes.copy();
-            cell.setCharacter(text.charAt(i));
+            Cell cell = new Cell(text.charAt(i), attributes);
             cells.set(column + i, cell);
             charsWritten++;
         }

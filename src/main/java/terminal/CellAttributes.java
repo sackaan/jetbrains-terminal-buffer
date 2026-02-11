@@ -51,4 +51,8 @@ public class CellAttributes {
     public boolean hasStyle(Style style) {
         return styles.contains(style);
     }
+
+    public CellAttributes copy() {
+        return new CellAttributes(foreground, background, styles);
+    }
 }
