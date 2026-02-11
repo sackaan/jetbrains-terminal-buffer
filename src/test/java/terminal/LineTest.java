@@ -14,10 +14,13 @@ public class LineTest {
         assertEquals(42, line.getWidth());
 
         for (int i = 0; i < line.getWidth(); i++) {
-            assertEquals(' ', line.getCell(i).getCharacter());
-            assertEquals(Color.DEFAULT, line.getCell(i).getForeground());
-            assertEquals(Color.DEFAULT, line.getCell(i).getBackground());
-            assertTrue(line.getCell(i).getStyles().isEmpty());
+            Cell cell = line.getCell(i);
+            CellAttributes attributes = cell.getAttributes();
+
+            assertEquals(' ', cell.getCharacter());
+            assertEquals(Color.DEFAULT, attributes.getForeground());
+            assertEquals(Color.DEFAULT, attributes.getBackground());
+            assertTrue(attributes.getStyles().isEmpty());
         }
     }
 
@@ -33,10 +36,12 @@ public class LineTest {
         line.setCell(5, cell);
 
         Cell retrievedCell = line.getCell(5);
+        CellAttributes attributes = retrievedCell.getAttributes();
+
         assertEquals('X', retrievedCell.getCharacter());
-        assertEquals(Color.RED, retrievedCell.getForeground());
-        assertEquals(Color.BLUE, retrievedCell.getBackground());
-        assertTrue(retrievedCell.hasStyle(Style.BOLD));
+        assertEquals(Color.RED, attributes.getForeground());
+        assertEquals(Color.BLUE, attributes.getBackground());
+        assertTrue(attributes.hasStyle(Style.BOLD));
     }
 
     @Test
@@ -48,10 +53,13 @@ public class LineTest {
         line.clear();
 
         for (int i = 0; i < line.getWidth(); i++) {
-            assertEquals(' ', line.getCell(i).getCharacter());
-            assertEquals(Color.DEFAULT, line.getCell(i).getForeground());
-            assertEquals(Color.DEFAULT, line.getCell(i).getBackground());
-            assertTrue(line.getCell(i).getStyles().isEmpty());
+            Cell clearedCell = line.getCell(i);
+            CellAttributes attributes = clearedCell.getAttributes();
+
+            assertEquals(' ', clearedCell.getCharacter());
+            assertEquals(Color.DEFAULT, attributes.getForeground());
+            assertEquals(Color.DEFAULT, attributes.getBackground());
+            assertTrue(attributes.getStyles().isEmpty());
         }
     }
 
