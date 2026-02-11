@@ -88,4 +88,41 @@ public class LineTest {
         assertThrows(IndexOutOfBoundsException.class, () -> line.setCell(-1, cell));
         assertThrows(IndexOutOfBoundsException.class, () -> line.setCell(10, cell));
     }
+
+    @Test
+    void testOverwrite() {
+        Line line = new Line(10);
+        Cell attributes = new Cell(' ', Color.GREEN, Color.BLACK, EnumSet.of(Style.BOLD));
+        int charsWritten = line.overwrite(2, "Hello", attributes);
+
+        assertEquals(5, charsWritten);
+
+        String expectedString = "  Hello   ";
+        assertEquals(expectedString, line.toString());
+    }
+
+    @Test
+    void testInsert(){
+        Line line = new Line(10);
+        line.overwrite(0, "ABCDE", new Cell(' ', Color.DEFAULT, Color.DEFAULT, EnumSet.noneOf(Style.class)));
+        Cell attributes = new Cell(' ', Color.GREEN, Color.BLACK, EnumSet.of(Style.BOLD));
+        int charsWritten = line.insert(2, "Hello", attributes);
+
+        assertEquals(5, charsWritten);
+
+        String finalExpectedString = "ABHelloCDE";
+        assertEquals(finalExpectedString, line.toString());
+    }
+
+    @Test
+    void testInsertOverflow(){
+        Line line = new Line(10);
+        Cell attributes = new Cell(' ', Color.GREEN, Color.BLACK, EnumSet.of(Style.BOLD));
+        line.overwrite(0, "ABCDEFGHIJ", attributes);
+
+        int inserted = line.insert(8, "XYZ", attributes);
+
+        assertEquals(2, inserted);
+        assertEquals("ABCDEFGHXY", line.toString());
+    }
 }
