@@ -2,6 +2,7 @@ package terminal;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 
@@ -13,6 +14,8 @@ public class TerminalBuffer {
 
     private final List<Line> screen;
     private final Deque<Line> scrollback;
+
+    private boolean wrapPending = false;
 
     private final Cursor cursor;
     private CellAttributes currentAttributes;
@@ -37,32 +40,74 @@ public class TerminalBuffer {
         this.currentAttributes = new CellAttributes();
     }
 
-    public void overwrite(String text) {
+    private void scrollUp() {
+        Line removed = screen.remove(0);
+        scrollback.addLast(removed);
+
+        if (scrollback.size() > maxScrollback) {
+            scrollback.removeFirst();
+        }
+
+        screen.add(new Line(width));
+    }
+
+    public void write(String text) {
         for (char c : text.toCharArray()) {
             putChar(c);
         }
     }
 
+    public void insert(String text) {
+        for (char c : text.toCharArray()) {
+            insertChar(c);
+        }
+    }
+
+    public void insertChar(char c) {
+        Line line = screen.get(cursor.getRow());
+
+        line.insert(cursor.getColumn(), String.valueOf(c), currentAttributes);
+
+        int nextCol = cursor.getColumn() + 1;
+
+        if (nextCol >= width) {
+            if (cursor.getRow() < height - 1) {
+                cursorNextLine();
+            } else {
+                cursorSetPosition(cursor.getRow(), width - 1);
+            }
+        } else {
+            cursorSetPosition(cursor.getRow(), nextCol);
+        }
+    }
+
     public void putChar(char c) {
+
+        if (wrapPending) {
+            if (cursor.getRow() == height - 1) {
+                scrollUp();
+                cursorSetPosition(height - 1, 0);
+            } else {
+                cursorNextLine();
+            }
+            wrapPending = false;
+        }
+
         Line line = screen.get(cursor.getRow());
 
         Cell cell = new Cell(c, currentAttributes.copy());
 
         line.setCell(cursor.getColumn(), cell);
 
-        int newColumn = cursor.getColumn() + 1;
-        if (newColumn >= width) {
-            if(cursor.getRow() == height - 1) {
-                cursorSetPosition(cursor.getRow(), width - 1);
-            } else {
-                cursorNextLine();
-            }
+        if (cursor.getColumn() == width - 1) {
+            wrapPending = true;
         } else {
             cursorMoveRight(1);
         }
+
     }
 
-    public String printScreen() {
+    public String getScreenAsString() {
         StringBuilder sb = new StringBuilder();
         for (Line line : screen) {
             for (int i = 0; i < width; i++) {
@@ -70,7 +115,6 @@ public class TerminalBuffer {
             }
             sb.append('\n');
         }
-        System.out.println(sb);
         return sb.toString();
     }
 
@@ -98,10 +142,16 @@ public class TerminalBuffer {
         int newRow = Math.max(0, Math.min(height - 1, row));
         int newColumn = Math.max(0, Math.min(width - 1, column));
         cursor.setPosition(newRow, newColumn);
+        wrapPending = false;
     }
 
     public void cursorNextLine() {
-        cursorSetPosition(cursor.getRow() + 1, 0);
+        if(cursor.getRow() == height - 1) {
+            scrollUp();
+            cursorSetPosition(height-1, 0);
+        } else {
+            cursorSetPosition(cursor.getRow() + 1, 0);
+        }
     }
 
     public int getWidth() {
@@ -125,10 +175,38 @@ public class TerminalBuffer {
     }
 
     public List<Line> getScreen() {
-        return screen;
+        return Collections.unmodifiableList(screen);
     }
 
-    public Deque<Line> getScrollback() {
-        return scrollback;
+    public List<Line> getScrollback() {
+        return List.copyOf(scrollback);
     }
+
+    public String getEntireBufferAsString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (Line line : scrollback) {
+            sb.append(line.toString()).append("\n");
+        }
+
+        for (Line line : screen) {
+            sb.append(line.toString()).append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    public void clearScreen() {
+        for (Line line : screen) {
+            line.clear();
+        }
+        cursorSetPosition(0, 0);
+        wrapPending = false;
+    }
+
+    public void clearScreenAndScrollback() {
+        clearScreen();
+        scrollback.clear();
+    }
+
 }

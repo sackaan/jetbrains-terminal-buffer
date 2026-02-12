@@ -25,7 +25,7 @@ public class TerminalBufferTest {
     public void testWriteWrapping() {
         TerminalBuffer termbuf = new TerminalBuffer(10, 7, 1000);
         String longText = "This is a long line that should wrap around the terminal buffer.";
-        termbuf.overwrite(longText);
+        termbuf.write(longText);
 
         String expected =
                 "This is a \n" +
@@ -36,7 +36,7 @@ public class TerminalBufferTest {
                 "rminal buf\n" +
                 "fer.      \n";
 
-        assertEquals(expected, termbuf.printScreen());
+        assertEquals(expected, termbuf.getScreenAsString());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class TerminalBufferTest {
     }
 
     @Test
-    public void testPrintScreen(){
+    public void testGetScreenAsString(){
         TerminalBuffer termbuf = new TerminalBuffer(5, 3, 1000);
         CellAttributes attrs = new CellAttributes(Color.RED, Color.BLUE, EnumSet.of(Style.BOLD));
         termbuf.getScreen().get(0).overwrite(0, "Hello", attrs);
@@ -75,6 +75,159 @@ public class TerminalBufferTest {
         termbuf.getScreen().get(2).overwrite(0, "!", attrs);
 
         String expected = "Hello\nWorld\n!    \n";
-        assertEquals(expected, termbuf.printScreen());
+        assertEquals(expected, termbuf.getScreenAsString());
     }
+
+    @Test
+    public void testInsertText() {
+        TerminalBuffer termbuf = new TerminalBuffer(10, 3, 1000);
+        termbuf.write("Hello");
+        termbuf.getCursor().setPosition(0, 3);
+        termbuf.insert("World");
+
+        String expected =
+                "HelWorldlo\n" +
+                "          \n" +
+                "          \n";
+        assertEquals(expected, termbuf.getScreenAsString());
+    }
+
+    @Test
+    public void testWriteAtStart() {
+        TerminalBuffer termbuf = new TerminalBuffer(10, 3, 1000);
+        termbuf.write("InitialTxt");
+        termbuf.cursorSetPosition(0, 0);
+        termbuf.write("New");
+
+        String expected =
+                "NewtialTxt\n" +
+                        "          \n" +
+                        "          \n";
+        assertEquals(expected, termbuf.getScreenAsString());
+    }
+
+    @Test
+    public void testWriteAtEnd() {
+        TerminalBuffer termbuf = new TerminalBuffer(10, 3, 1000);
+        termbuf.write("Hello");
+        termbuf.cursorSetPosition(0, 7);
+        termbuf.write("End");
+
+        String expected =
+                "Hello  End\n" +
+                        "          \n" +
+                        "          \n";
+        assertEquals(expected, termbuf.getScreenAsString());
+    }
+
+    @Test
+    public void testInsertAtStart() {
+        TerminalBuffer termbuf = new TerminalBuffer(10, 3, 1000);
+        termbuf.write("World");
+        termbuf.cursorSetPosition(0, 0);
+        termbuf.insert("Hello");
+
+        String expected =
+                "HelloWorld\n" +
+                        "          \n" +
+                        "          \n";
+        assertEquals(expected, termbuf.getScreenAsString());
+    }
+
+    @Test
+    public void testInsertMidLine() {
+        TerminalBuffer termbuf = new TerminalBuffer(15, 3, 1000);
+        termbuf.write("HelloWorld");
+        termbuf.cursorSetPosition(0, 5);
+        termbuf.insert(" Big ");
+
+        String expected =
+                "Hello Big World\n" +
+                        "               \n" +
+                        "               \n";
+        assertEquals(expected, termbuf.getScreenAsString());
+    }
+
+    @Test
+    public void testScrollUp() {
+        TerminalBuffer termbuf = new TerminalBuffer(10, 3, 1000);
+        termbuf.write("Line1");
+        termbuf.cursorNextLine();
+        termbuf.write("Line2");
+        termbuf.cursorNextLine();
+        termbuf.write("Line3");
+        termbuf.cursorNextLine();
+
+        String expected =
+                "Line2     \n" +
+                "Line3     \n" +
+                "          \n";
+        assertEquals(expected, termbuf.getScreenAsString());
+        assertEquals("Line1     ", termbuf.getScrollback().getFirst().toString());
+
+
+    }
+
+    @Test
+    public void testEntireBufferIncludesScrollback() {
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 10);
+
+        buf.write("ABCDE");
+        buf.write("FGHIJ");
+        buf.write("KLMNO");
+
+        String all = buf.getEntireBufferAsString();
+
+        assertTrue(all.contains("ABCDE"));
+    }
+
+    @Test
+    public void testExtremeScrollback() {
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 1);
+
+        buf.write("ABCDE");
+        buf.write("FGHIJ");
+        buf.write("KLMNO");
+        buf.write("PQRST");
+
+        String all = buf.getEntireBufferAsString();
+
+        assertFalse(all.contains("ABCDE"));
+        assertTrue(all.contains("FGHIJ"));
+    }
+
+    @Test
+    public void testClearScreen() {
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 10);
+
+        buf.write("ABCDE");
+        buf.write("FGHIJ");
+
+        buf.clearScreen();
+
+        String expected =
+                "     \n" +
+                "     \n";
+        assertEquals(expected, buf.getScreenAsString());
+    }
+
+    @Test
+    public void testClearScreenAndScrollback() {
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 10);
+
+        buf.write("ABCDE");
+        buf.write("FGHIJ");
+        buf.write("KLMNO");
+        buf.write("PQRST");
+
+        buf.clearScreenAndScrollback();
+
+        String expected =
+                "     \n" +
+                "     \n";
+        assertEquals(expected, buf.getScreenAsString());
+        assertTrue(buf.getScrollback().isEmpty());
+
+    }
+
 }
