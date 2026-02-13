@@ -250,4 +250,79 @@ public class TerminalBufferTest {
         assertEquals(expected, buf.getScreenAsString());
     }
 
+    @Test
+    public void testGetLineAsString(){
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 10);
+        buf.write("Hello");
+        buf.cursorNextLine();
+        buf.write("World");
+
+        assertEquals("Hello", buf.getLineAsString(0));
+        assertEquals("World", buf.getLineAsString(1));
+    }
+
+    @Test
+    public void testInsertEmptyLineAtBottom() {
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 10);
+        buf.write("Hello");
+        buf.cursorNextLine();
+        buf.write("World");
+
+        assertEquals("Hello", buf.getLineAsString(0));
+        assertEquals("World", buf.getLineAsString(1));
+
+        buf.insertEmptyLineAtBottom();
+        buf.insertEmptyLineAtBottom();
+
+        String expected =
+                "     \n" +
+                "     \n";
+        assertEquals(expected, buf.getScreenAsString());
+    }
+
+    @Test
+    public void testGetCharAt() {
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 10);
+        buf.write("Hello");
+        buf.cursorNextLine();
+        buf.write("World");
+
+        assertEquals('H', buf.getCharAt(0, 0));
+        assertEquals('e', buf.getCharAt(0, 1));
+        assertEquals('W', buf.getCharAt(1, 0));
+    }
+
+    @Test
+    public void testGetAttributesAt() {
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 10);
+        CellAttributes attrs = new CellAttributes(Color.RED, Color.BLUE, EnumSet.of(Style.BOLD));
+        buf.getCurrentAttributes().setForeground(Color.RED);
+        buf.getCurrentAttributes().setBackground(Color.BLUE);
+        buf.getCurrentAttributes().addStyle(Style.BOLD);
+
+        buf.write("Hello");
+        buf.cursorNextLine();
+        buf.write("World");
+
+        assertEquals(attrs, buf.getAttributesAt(0, 0));
+        assertEquals(attrs, buf.getAttributesAt(0, 1));
+        assertEquals(attrs, buf.getAttributesAt(1, 0));
+    }
+
+    @Test
+    public void testResetAttributes() {
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 10);
+        buf.setForeground(Color.RED);
+        buf.setBackground(Color.BLUE);
+        buf.addStyle(Style.BOLD);
+
+        buf.write("Hello");
+        buf.cursorNextLine();
+        buf.write("World");
+
+        buf.resetAttributes();
+
+        assertEquals(new CellAttributes(), buf.getCurrentAttributes());
+    }
+
 }

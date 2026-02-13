@@ -55,4 +55,23 @@ public class CellAttributes {
     public CellAttributes copy() {
         return new CellAttributes(foreground, background, styles);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CellAttributes that)) return false;
+
+        return foreground == that.foreground &&
+                background == that.background &&
+                styles.equals(that.styles);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = foreground.hashCode();
+        result = 31 * result + background.hashCode();
+        result = 31 * result + styles.hashCode();
+        return result;
+    }
+
 }
