@@ -40,6 +40,27 @@ public class TerminalBuffer {
         this.currentAttributes = new CellAttributes();
     }
 
+    public CellAttributes getAttributesAt(int globalRow, int column) {
+        Line line = getLineInternal(globalRow);
+        Cell cell = line.getCell(column);
+        return cell.getAttributes();
+    }
+
+    private Line getLineInternal(int globalRow) {
+        int totalLines = scrollback.size() + screen.size();
+
+        if (globalRow < 0 || globalRow >= totalLines) {
+            throw new IndexOutOfBoundsException("Invalid row: " + globalRow);
+        }
+
+        if(globalRow < scrollback.size()) {
+            return new ArrayList<>(scrollback).get(globalRow);
+        } else {
+            int screenIndex = globalRow - scrollback.size();
+            return screen.get(screenIndex);
+        }
+    }
+
     private void scrollUp() {
         Line removed = screen.remove(0);
         scrollback.addLast(removed);
@@ -64,6 +85,7 @@ public class TerminalBuffer {
     }
 
     public void insertChar(char c) {
+        wrapPending = false;
         Line line = screen.get(cursor.getRow());
 
         line.insert(cursor.getColumn(), String.valueOf(c), currentAttributes);
@@ -79,6 +101,19 @@ public class TerminalBuffer {
         } else {
             cursorSetPosition(cursor.getRow(), nextCol);
         }
+    }
+
+    public String getLineAsString(int globalRow) {
+        return getLineInternal(globalRow).toString();
+    }
+
+    public char getCharAt(int globalRow, int column) {
+        Line line = getLineInternal(globalRow);
+        return line.getCell(column).getCharacter();
+    }
+
+    public void insertEmptyLineAtBottom() {
+        scrollUp();
     }
 
     public void putChar(char c) {
@@ -218,6 +253,26 @@ public class TerminalBuffer {
     public void clearScreenAndScrollback() {
         clearScreen();
         scrollback.clear();
+    }
+
+    public void setForeground(Color color){
+        currentAttributes.setForeground(color);
+    }
+
+    public void setBackground(Color color){
+        currentAttributes.setBackground(color);
+    }
+
+    public void addStyle(Style style){
+        currentAttributes.addStyle(style);
+    }
+
+    public void removeStyle(Style style){
+        currentAttributes.removeStyle(style);
+    }
+
+    public void resetAttributes(){
+        currentAttributes = new CellAttributes();
     }
 
 }

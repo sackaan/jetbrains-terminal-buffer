@@ -67,5 +67,9 @@ public class Cell {
         return attributes.hasStyle(style);
     }
 
+    public CellAttributes getAttributes() {
+        return attributes.copy();
+    }
+
 
 }
