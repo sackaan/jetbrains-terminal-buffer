@@ -154,6 +154,17 @@ public class TerminalBuffer {
         }
     }
 
+    public void fillLine(int row, char c){
+        if(row < 0 || row >= height) {
+            throw new IndexOutOfBoundsException("Row out of bounds");
+        }
+
+        Line line = screen.get(row);
+        for(int i = 0; i < width; i++) {
+            line.setCell(i, new Cell(c, currentAttributes.copy()));
+        }
+    }
+
     public int getWidth() {
         return width;
     }
