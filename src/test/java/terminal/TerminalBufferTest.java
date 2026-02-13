@@ -230,4 +230,24 @@ public class TerminalBufferTest {
 
     }
 
+    @Test
+    public void testFillLineException() {
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 10);
+
+        assertThrows(IndexOutOfBoundsException.class, () -> buf.fillLine(-1, 'A'));
+        assertThrows(IndexOutOfBoundsException.class, () -> buf.fillLine(5, 'B'));
+    }
+
+    @Test
+    public void testFillLine() {
+        TerminalBuffer buf = new TerminalBuffer(5, 2, 10);
+        buf.fillLine(0, 'A');
+        buf.fillLine(1, 'B');
+
+        String expected =
+                "AAAAA\n" +
+                "BBBBB\n";
+        assertEquals(expected, buf.getScreenAsString());
+    }
+
 }
